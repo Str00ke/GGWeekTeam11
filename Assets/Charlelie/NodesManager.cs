@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+enum PlayType
+{
+    WATCHER,
+    RUNNER
+}
 public class NodesManager : MonoBehaviour
 {
     public GameObject node;
@@ -12,23 +17,37 @@ public class NodesManager : MonoBehaviour
 
     public int width = 10;
     public int height = 10;
-    // Start is called before the first frame update
+
+    public int policeNbr = 5;
+
+    PlayType playType;
+
+    MiniGameManager miniGameManager;
+    private void Awake()
+    {
+        playType = new PlayType();  
+    }
+    
     void Start()
     {
+        miniGameManager = FindObjectOfType<MiniGameManager>();
         nodes = new GameObject[width * height];
-        Vector3 vec = new Vector3(-width, 6, 0);
+        Vector3 vec = new Vector3(-width, 8, 0);
         for (int i = 0; i < width * height; ++i)
         {
-            if (i % 10 == 0)
+            if (i % width == 0)
             {
-                vec.y -= 1;
+                vec.y -= 2;
                 vec.x = -width;
             }
             nodes[i] = Instantiate(node, vec, transform.rotation);
-            vec.x += 1;
+            vec.x += 2;
 
         }
-        Instantiate(police/*, nodes[(policePos)].transform.position, transform.rotation*/);
+        for (int i = 0; i < policeNbr; ++i)
+        {            
+            Instantiate(police/*, nodes[(policePos)].transform.position, transform.rotation*/);
+        }        
         Instantiate(player/*, nodes[(policePos)].transform.position, transform.rotation*/);
     }
 

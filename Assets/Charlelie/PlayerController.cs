@@ -20,6 +20,7 @@ enum VerDir
 public class PlayerController : MonoBehaviour
 {
     NodesManager nodeManager;
+    MiniGameManager miniGameManager;
     public int playerPos, playerPosParent;
     Direction direction = new Direction();
     HorDir horDir = new HorDir();
@@ -27,11 +28,14 @@ public class PlayerController : MonoBehaviour
     bool isAtNode = true;
     Vector3 playerNodeStart, playerNodeEnd;
     float progresion;
-
+    bool isinHacking = false;
+    public bool isInHole = false;
+    GameObject nearManHole;
     float moveHor, moveVer;
     void Start()
     {
         nodeManager = FindObjectOfType<NodesManager>();
+        miniGameManager = FindObjectOfType<MiniGameManager>();
 
         playerPos = 55;
         transform.position = nodeManager.nodes[playerPos].transform.position;
@@ -40,6 +44,21 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (isinHacking || isInHole)
+            return;
+
+        int layerMask = (LayerMask.GetMask("Manhole"));
+        Collider2D col = Physics2D.OverlapCircle(transform.position, 2, layerMask);
+        if (col && col != nearManHole)
+            nearManHole = col.gameObject;
+        if (col && Input.GetKeyDown(KeyCode.E))
+        {
+            isinHacking = true;
+            miniGameManager.StartMiniGame();
+        }
+
+
+
         UpdateDirEnums();
         float value = 1;
         moveHor = Input.GetAxisRaw("Horizontal");
@@ -48,6 +67,7 @@ public class PlayerController : MonoBehaviour
         
         if (isAtNode)
         {
+            playerPosParent = playerPos;
             progresion = 0;
             playerNodeStart = nodeManager.nodes[playerPos].transform.position;
             if (SelectNode()) isAtNode = false;
@@ -120,7 +140,7 @@ public class PlayerController : MonoBehaviour
             playerPosParent = playerPos;
             if (moveHor > 0)
             {
-                if (((playerPos + 10) + 1) % 10 != 0)
+                if (((playerPos + nodeManager.width) + 1) % nodeManager.width != 0)
                 {
                     playerNodeEnd = nodeManager.nodes[playerPos + 1].transform.position;
                     playerPos += 1;
@@ -128,7 +148,7 @@ public class PlayerController : MonoBehaviour
             }
             else if (moveHor < 0)
             {
-                if (!((playerPos / 10) > ((playerPos - 1) / 10)))
+                if (!((playerPos / nodeManager.width) > ((playerPos - 1) / nodeManager.width)))
                 {
                     playerNodeEnd = nodeManager.nodes[playerPos - 1].transform.position;
                     playerPos -= 1;
@@ -142,18 +162,18 @@ public class PlayerController : MonoBehaviour
             playerPosParent = playerPos;
             if (moveVer < 0)
             {
-                if (playerPos + 10 < nodeManager.nodes.Length)
+                if (playerPos + nodeManager.width < nodeManager.nodes.Length)
                 {
-                    playerNodeEnd = nodeManager.nodes[playerPos + 10].transform.position;
-                    playerPos += 10;
+                    playerNodeEnd = nodeManager.nodes[playerPos + nodeManager.width].transform.position;
+                    playerPos += nodeManager.width;
                 }
             }
             else if (moveVer > 0)
             {
-                if (playerPos - 10 >= 0)
+                if (playerPos - nodeManager.width >= 0)
                 {
-                    playerNodeEnd = nodeManager.nodes[playerPos - 10].transform.position;
-                    playerPos -= 10;
+                    playerNodeEnd = nodeManager.nodes[playerPos - nodeManager.width].transform.position;
+                    playerPos -= nodeManager.width;
                 }
             }
             direction = Direction.VERTICAL;
@@ -173,5 +193,44 @@ public class PlayerController : MonoBehaviour
         if (verDir == VerDir.DOWN && moveVer > 0) verDir = VerDir.UP;
     }
 
-    
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, 2);
+    }
+
+
+    public void HackingSuccess()
+    {
+       StartCoroutine(MovePlayerInManhole(nearManHole.transform.position, nearManHole.GetComponent<Manhole>().CouplePos(), nearManHole.GetComponent<Manhole>().nearestNode));
+       isInHole = true;
+    }
+
+    IEnumerator MovePlayerInManhole(Vector3 startPos, Vector3 targetPos, int node)
+    {
+        float time = 0;
+        float duration = 5f;
+
+        while (time < duration)
+        {
+            transform.position = Vector3.Lerp(startPos, targetPos, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        time = 0;
+        duration = 0.5f;
+        startPos = targetPos;
+        targetPos = nodeManager.nodes[node].transform.position;
+
+        while (time < duration)
+        {
+            transform.position = Vector3.Lerp(startPos, targetPos, time / duration);
+            time += Time.deltaTime;
+            yield return null;
+        }
+        playerPos = node;
+        isInHole = false;
+    }
+
 }

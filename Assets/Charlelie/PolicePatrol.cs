@@ -28,10 +28,10 @@ public class PolicePatrol : MonoBehaviour
     Vector3 policeDirEnd;
     // Start is called before the first frame update
     void Start()
-    {
-        
+    {        
         nodeManager = FindObjectOfType<NodesManager>();
-        policePos = (nodeManager.height * nodeManager.width) / 2;
+        int randNode = Random.Range(0, nodeManager.nodes.Length);
+        policePos = randNode;
         policePosParent = policePos;       
         policeDirStart = nodeManager.nodes[policePos].transform.position;
         transform.position = policeDirStart;
@@ -40,7 +40,7 @@ public class PolicePatrol : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log("ISATNODE: " + isAtNode);
+
         if (behaviour == Behaviour.PATROL)
         {
             
@@ -53,17 +53,17 @@ public class PolicePatrol : MonoBehaviour
                 if (policePos == 0)
                 {
                     if (policePos + 1 != policePosParent) pos.Add(policePos + 1);
-                    if (policePos + 10 != policePosParent) pos.Add(policePos + 10);
+                    if (policePos + nodeManager.width != policePosParent) pos.Add(policePos + nodeManager.width);
                 }
                 else
                 {
-                    if (policePos - 10 >= 0 && policePos - 10 != policePosParent) pos.Add(policePos - 10);
+                    if (policePos - nodeManager.width >= 0 && policePos - nodeManager.width != policePosParent) pos.Add(policePos - nodeManager.width);
 
-                    if (policePos + 10 < nodeManager.nodes.Length && policePos + 10 != policePosParent) pos.Add(policePos + 10);
+                    if (policePos + nodeManager.width < nodeManager.nodes.Length && policePos + nodeManager.width != policePosParent) pos.Add(policePos + nodeManager.width);
 
-                    if (((policePos + 10) + 1) % 10 != 0 && policePos + 1 != policePosParent) pos.Add(policePos + 1);
+                    if (((policePos + nodeManager.width) + 1) % nodeManager.width != 0 && policePos + 1 != policePosParent) pos.Add(policePos + 1);
 
-                    if (!((policePos / 10) > ((policePos - 1) / 10)) && policePos - 1 != policePosParent) pos.Add(policePos - 1);
+                    if (!((policePos / nodeManager.width) > ((policePos - 1) / nodeManager.width)) && policePos - 1 != policePosParent) pos.Add(policePos - 1);
                 }
 
                 policeDirEnd = ChooseNode(pos);
@@ -71,6 +71,8 @@ public class PolicePatrol : MonoBehaviour
                 if (CheckForEngageChase())
                 {
                     behaviour = Behaviour.CHASE;
+                    Debug.Log("Entering Chase Mode");
+                    Debug.Break();
                     PoliceInstigatePosition();
                 }
                     
@@ -80,7 +82,6 @@ public class PolicePatrol : MonoBehaviour
         else if (behaviour == Behaviour.CHASE)
         {   if (isAtNode)
             {
-                Debug.Log(isAtNode);
                 isAtNode = false;
                 if (CheckForEngageChase())
                 {
@@ -102,7 +103,6 @@ public class PolicePatrol : MonoBehaviour
 
     Vector3 ChooseNode(List<int> poses)
     {
-        Debug.Log("PATROL");
         Vector3 nodeChoosen;
         policeDirStart = nodeManager.nodes[policePos].transform.position;
         int rand = Random.Range(0, poses.Count);
@@ -110,8 +110,8 @@ public class PolicePatrol : MonoBehaviour
         policePos = poses[rand];
         nodeChoosen = nodeManager.nodes[poses[rand]].transform.position;
 
-        if (policePos == policePosParent + 10) carDir = CarDir.DOWN;
-        else if (policePos == policePosParent - 10) carDir = CarDir.UP;
+        if (policePos == policePosParent + nodeManager.width) carDir = CarDir.DOWN;
+        else if (policePos == policePosParent - nodeManager.width) carDir = CarDir.UP;
         else if (policePos == policePosParent - 1) carDir = CarDir.LEFT;
         else if (policePos == policePosParent + 1) carDir = CarDir.RIGHT;
 
@@ -120,7 +120,6 @@ public class PolicePatrol : MonoBehaviour
 
     IEnumerator MovePolicePatrol()
     {
-        Debug.Log("MOVE");
         float time = 0;
         float duration = 0.2f;
 
@@ -135,25 +134,30 @@ public class PolicePatrol : MonoBehaviour
 
    bool CheckForEngageChase()
    {
-        bool isSeeingPlayer = false;
-        int playerPos = FindObjectOfType<PlayerController>().playerPos;
-        GameObject player = FindObjectOfType<PlayerController>().gameObject;
-        float dist = Vector3.Distance(transform.position, player.transform.position);
+        PlayerController playerController = FindObjectOfType<PlayerController>();
 
+        if (playerController.isInHole) return false;
+
+
+        bool isSeeingPlayer = false;
+        int playerPos = playerController.playerPos;
+        GameObject player = playerController.gameObject;
+        float dist = Vector3.Distance(transform.position, player.transform.position);
+        //Debug.Log(/*carDir + "   " + */policePos + "   " + playerPos);
         if (behaviour == Behaviour.PATROL)
         {
-            if (dist <= 1)
+            if (/*dist <= 1*/true)
             {
-                if (carDir == CarDir.UP && playerPos == policePosParent - 10)
+                if (carDir == CarDir.UP && playerPos == policePosParent - nodeManager.width)
                 {
                     isSeeingPlayer = true;
-                    policePos -= 10;
+                    policePos -= nodeManager.width;
                 }
                     
-                else if (carDir == CarDir.DOWN && playerPos == policePosParent + 10)
+                else if (carDir == CarDir.DOWN && playerPos == policePosParent + nodeManager.width)
                 {
                     isSeeingPlayer = true;
-                    policePos += 10;
+                    policePos += nodeManager.width;
                 }
                 else if (carDir == CarDir.LEFT && playerPos == policePosParent - 1)
                 {
@@ -175,20 +179,20 @@ public class PolicePatrol : MonoBehaviour
         {
             if (dist < 0.5f)
             {
-                nodeManager.Busted();
+                //nodeManager.Busted();
             }
-            if (dist <= 2)
+            if (/*dist <= 2*/ true)
             {
-                if (playerPos == policePos - 10)
+                if (playerPos == policePos - nodeManager.width)
                 {
                     isSeeingPlayer = true;
-                    policePos -= 10;
+                    policePos -= nodeManager.width;
                 }
 
-                else if (playerPos == policePos + 10)
+                else if (playerPos == policePos + nodeManager.width)
                 {
                     isSeeingPlayer = true;
-                    policePos += 10;
+                    policePos += nodeManager.width;
                 }
                 else if (playerPos == policePos - 1)
                 {
@@ -208,7 +212,7 @@ public class PolicePatrol : MonoBehaviour
             }
             else
                 isSeeingPlayer = false;
-            Debug.Log(isSeeingPlayer);
+            //Debug.Log(isSeeingPlayer);
         }
 
         
