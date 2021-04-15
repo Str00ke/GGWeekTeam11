@@ -12,14 +12,17 @@ public class Radio : MonoBehaviour
     public bool isOnFrequency = false;
     float freqAccuracy;
     float frequency, minBound, maxBound;
-    float changeFrequencyTime = 3.0f;
+    float changeFrequencyTime = 7.0f;
     float changeFreqTime = 0;
+
+    public TextMesh freqText;
+    public GameObject button;
 
     SerialPort stream = new SerialPort("COM3", 9600);
 
     void Start()
     {
-        stream.ReadTimeout = 50;
+        //stream.ReadTimeout = 50;
         stream.Open();
 
 
@@ -34,13 +37,15 @@ public class Radio : MonoBehaviour
     {
 
         string value = stream.ReadLine();
-        int valueInt = int.Parse(value);
-        Debug.Log(valueInt);
-        //if (index > 100) index = 100;
-        //else if (index < 0) index = 0;
-        if (Input.GetKey(KeyCode.LeftArrow) && index > 0) index -= speed;
-        if (Input.GetKey(KeyCode.RightArrow) && index < 100) index += speed;
+        float valueInt = float.Parse(value.Split('_')[0]);
+        if (valueInt <= 800)
+        {
+            index = (valueInt / 800) * 100;
+            freqText.text = index.ToString();
+            button.transform.rotation = Quaternion.Euler(0, 0, valueInt);
+        }
 
+        Debug.Log(frequency);
         pos.transform.position = MovePos();
 
         if (index >= minBound && index <= maxBound)

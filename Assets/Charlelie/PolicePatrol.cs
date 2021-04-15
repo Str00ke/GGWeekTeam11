@@ -22,6 +22,7 @@ public class PolicePatrol : MonoBehaviour
     Radio radio;
     bool isAtNode = true;
     SpriteRenderer sR;
+    public Sprite carDown, carUp, carSide;
 
     int policePos;
     int policePosParent;
@@ -43,6 +44,25 @@ public class PolicePatrol : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (carDir == CarDir.LEFT || carDir == CarDir.RIGHT)
+        {
+            sR.sprite = carSide;
+            if (carDir == CarDir.LEFT)
+                sR.flipX = false;
+            else
+                sR.flipX = true;
+        } else
+        {
+            sR.flipX = false;
+            if (carDir == CarDir.UP)
+            {
+                sR.sprite = carUp;
+            } else
+            {
+                sR.sprite = carDown;
+            } 
+        }
+
         if (radio.isOnFrequency)
             sR.color = new Color(sR.color.r, sR.color.g, sR.color.b, 255);
         else
@@ -78,7 +98,7 @@ public class PolicePatrol : MonoBehaviour
                 if (CheckForEngageChase())
                 {
                     behaviour = Behaviour.CHASE;
-                    Debug.Log("Entering Chase Mode");
+                    //Debug.Log("Entering Chase Mode");
                     //Debug.Break();
                     PoliceInstigatePosition();
                 }
@@ -217,8 +237,8 @@ public class PolicePatrol : MonoBehaviour
                     policePos = playerPos;
                 }
             }
-            else
-                isSeeingPlayer = false;
+            /*else
+                isSeeingPlayer = false;*/
             //Debug.Log(isSeeingPlayer);
         }
 

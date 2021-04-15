@@ -32,17 +32,17 @@ public class NodesManager : MonoBehaviour
     {
         miniGameManager = FindObjectOfType<MiniGameManager>();
         nodes = new GameObject[width * height];
-        Vector3 vec = new Vector3(-width, 8, 0);
+        Vector3 vec = new Vector3(-8, 8, 0);
         for (int i = 0; i < width * height; ++i)
         {
-            if (i % width == 0)
+            if ((i % width == 0) && (i > 0))
             {
-                vec.y -= 2;
-                vec.x = -width;
+                vec.y -= 1.755f;
+                vec.x = -8;
             }
             nodes[i] = Instantiate(node, vec, transform.rotation);
             nodes[i].GetComponent<Node>().SetIndex(i);
-            vec.x += 2;
+            vec.x += 1.620f;
 
         }
         for (int i = 0; i < policeNbr; ++i)

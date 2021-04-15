@@ -32,10 +32,15 @@ public class PlayerController : MonoBehaviour
     public bool isInHole = false;
     GameObject nearManHole;
     float moveHor, moveVer;
+    Animator anim;
+    SpriteRenderer sR;
     void Start()
     {
         nodeManager = FindObjectOfType<NodesManager>();
         miniGameManager = FindObjectOfType<MiniGameManager>();
+
+        anim = GetComponent<Animator>();
+        sR = GetComponent<SpriteRenderer>();
 
         playerPos = 55;
         transform.position = nodeManager.nodes[playerPos].transform.position;
@@ -44,6 +49,36 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (isAtNode)
+        {
+            anim.SetBool("isMoving", false);
+        } else
+        {
+            anim.SetBool("isMoving", true);
+            if (direction == Direction.VERTICAL)
+            {
+                anim.SetFloat("Horizontal", 0);
+                if (verDir == VerDir.UP)
+                {
+                    anim.SetFloat("Vertical", -1);
+                } else
+                {
+                    anim.SetFloat("Vertical", 1);
+                }
+            } else
+            {
+                anim.SetFloat("Vertical", 0);
+                if (horDir == HorDir.RIGHT)
+                {
+                    anim.SetFloat("Horizontal", 1);
+                }
+                else
+                {
+                    anim.SetFloat("Horizontal", -1);
+                }
+            }
+        }
+
         if (isinHacking || isInHole)
             return;
 

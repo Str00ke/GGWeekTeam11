@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Charlelie/TestScene.unity
+    guid: f230289362d95e24592a5dc65278a0a6
   m_configObjects: {}

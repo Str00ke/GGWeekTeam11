@@ -8,7 +8,10 @@ public class LevelLoader : MonoBehaviour
     #region Variables
     [SerializeField] Animator transition;
     [SerializeField] float transitionTime;
+    public string loadScene;
     #endregion
+
+
     public void StartTransition(int Index)
     {
         StartCoroutine(SceneTransition(Index));
@@ -20,6 +23,6 @@ public class LevelLoader : MonoBehaviour
 
         yield return new WaitForSeconds(transitionTime);
 
-        SceneManager.LoadScene(sceneIndex);
+        SceneManager.LoadScene(loadScene);
     }
 }
