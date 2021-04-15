@@ -202,8 +202,9 @@ public class PlayerController : MonoBehaviour
 
     public void HackingSuccess()
     {
-       StartCoroutine(MovePlayerInManhole(nearManHole.transform.position, nearManHole.GetComponent<Manhole>().CouplePos(), nearManHole.GetComponent<Manhole>().nearestNode));
+       StartCoroutine(MovePlayerInManhole(nearManHole.transform.position, nearManHole.GetComponent<Manhole>().CouplePos(), nearManHole.GetComponent<Manhole>().couple.GetComponent<Manhole>().nearestNode));
        isInHole = true;
+       isinHacking = false;
     }
 
     IEnumerator MovePlayerInManhole(Vector3 startPos, Vector3 targetPos, int node)

@@ -19,17 +19,20 @@ public class PolicePatrol : MonoBehaviour
     Behaviour behaviour = new Behaviour();
     CarDir carDir = new CarDir();
     NodesManager nodeManager;
-
+    Radio radio;
     bool isAtNode = true;
+    SpriteRenderer sR;
 
     int policePos;
     int policePosParent;
     Vector3 policeDirStart;
     Vector3 policeDirEnd;
-    // Start is called before the first frame update
+    
     void Start()
-    {        
+    {
+        sR = GetComponent<SpriteRenderer>();
         nodeManager = FindObjectOfType<NodesManager>();
+        radio = FindObjectOfType<Radio>();
         int randNode = Random.Range(0, nodeManager.nodes.Length);
         policePos = randNode;
         policePosParent = policePos;       
@@ -40,6 +43,10 @@ public class PolicePatrol : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (radio.isOnFrequency)
+            sR.color = new Color(sR.color.r, sR.color.g, sR.color.b, 255);
+        else
+            sR.color = new Color(sR.color.r, sR.color.g, sR.color.b, 0);
 
         if (behaviour == Behaviour.PATROL)
         {
@@ -72,7 +79,7 @@ public class PolicePatrol : MonoBehaviour
                 {
                     behaviour = Behaviour.CHASE;
                     Debug.Log("Entering Chase Mode");
-                    Debug.Break();
+                    //Debug.Break();
                     PoliceInstigatePosition();
                 }
                     

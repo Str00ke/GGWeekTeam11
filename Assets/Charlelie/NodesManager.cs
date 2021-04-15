@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-enum PlayType
+public enum PlayType
 {
     WATCHER,
     RUNNER
@@ -20,12 +20,12 @@ public class NodesManager : MonoBehaviour
 
     public int policeNbr = 5;
 
-    PlayType playType;
+    public PlayType playType;
 
     MiniGameManager miniGameManager;
     private void Awake()
     {
-        playType = new PlayType();  
+        playType = new PlayType();
     }
     
     void Start()
@@ -41,6 +41,7 @@ public class NodesManager : MonoBehaviour
                 vec.x = -width;
             }
             nodes[i] = Instantiate(node, vec, transform.rotation);
+            nodes[i].GetComponent<Node>().SetIndex(i);
             vec.x += 2;
 
         }

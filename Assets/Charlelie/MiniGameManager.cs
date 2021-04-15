@@ -17,7 +17,6 @@ public class MiniGameManager : MonoBehaviour
         if (playerController == null && FindObjectOfType<PlayerController>())
         {
             playerController = FindObjectOfType<PlayerController>();
-            Debug.Log("Get");
         }
     }
 

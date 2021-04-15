@@ -32,6 +32,13 @@ public class MiniGame_Code : MonoBehaviour
         {
             codeGuessList[i].text = i.ToString();
         }
+
+        
+
+        if (nodeManager.playType == PlayType.WATCHER)
+        {
+
+        }
     }
 
     void Update()
