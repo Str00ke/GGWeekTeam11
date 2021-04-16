@@ -21,12 +21,12 @@ public class Radio : MonoBehaviour
     public AudioClip chat1, chat2;
     AudioSource audioSource;
 
-    SerialPort stream = new SerialPort("COM3", 9600);
+    //SerialPort stream = new SerialPort("COM3", 9600);
 
     void Start()
     {
         //stream.ReadTimeout = 50;
-        stream.Open();
+        //stream.Open();
 
         audioSource = Camera.main.GetComponent<AudioSource>();
         audioSource.clip = chat1;
@@ -40,15 +40,15 @@ public class Radio : MonoBehaviour
     void Update()
     {
 
-        string value = stream.ReadLine();
-        float valueInt = float.Parse(value.Split('_')[0]);
-        if (valueInt <= 800)
+        //string value = stream.ReadLine();
+        //float valueInt = float.Parse(value.Split('_')[0]);
+        /*if (valueInt <= 800)
         {
             index = (valueInt / 800) * 100;
             index = (float)System.Math.Round(index, 1);
             freqText.text = index.ToString();
             button.transform.rotation = Quaternion.Euler(0, 0, valueInt);
-        }
+        }*/
 
         //Debug.Log(frequency);
         pos.transform.position = MovePos();

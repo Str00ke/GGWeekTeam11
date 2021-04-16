@@ -44,11 +44,58 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sounds:
-  - name: 
-    clip: {fileID: 0}
-    clips: []
-    volume: 0
+  - name: Run
+    clips:
+    - {fileID: 8300000, guid: 2a21eae0bf7a5624aa965215c67683ad, type: 3}
+    volume: 0.5
+    pitch: 0.1
+    loop: 1
+    playOnAwake: 0
+    source: {fileID: 0}
+    hasMultipleClips: 0
+  - name: Hacking
+    clips:
+    - {fileID: 8300000, guid: f06f68623bd3f6a498dfd89ed94ebf63, type: 3}
+    volume: 0.5
+    pitch: 0.1
+    loop: 1
+    playOnAwake: 0
+    source: {fileID: 0}
+    hasMultipleClips: 0
+  - name: Egout
+    clips:
+    - {fileID: 8300000, guid: bc4aee3190e1a38468fa94b901b77e5e, type: 3}
+    volume: 0.5
     pitch: 0.1
     loop: 0
+    playOnAwake: 0
+    source: {fileID: 0}
+    hasMultipleClips: 0
+  - name: FondPolice
+    clips:
+    - {fileID: 8300000, guid: efe90695f7af866498c0cb12c3ce6bf5, type: 3}
+    - {fileID: 8300000, guid: 395bc7cb01ee68e4db95817611556c0e, type: 3}
+    volume: 0.5
+    pitch: 0.1
+    loop: 1
+    playOnAwake: 0
+    source: {fileID: 0}
+    hasMultipleClips: 0
+  - name: OndesBrouillees
+    clips:
+    - {fileID: 8300000, guid: cf1851ababf8f6c41a725d3319267ad0, type: 3}
+    volume: 0.5
+    pitch: 0.1
+    loop: 1
+    playOnAwake: 0
+    source: {fileID: 0}
+    hasMultipleClips: 0
+  - name: MainTheme
+    clips:
+    - {fileID: 8300000, guid: 760c8b06fcfa0c54da86d9f425960e81, type: 3}
+    volume: 0.5
+    pitch: 0.1
+    loop: 1
+    playOnAwake: 1
     source: {fileID: 0}
     hasMultipleClips: 0
