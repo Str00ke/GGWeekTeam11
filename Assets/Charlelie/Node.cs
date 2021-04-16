@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Node : MonoBehaviour
 {
-    int index;
+    public int index;
     GameObject onNode;
 
     void Start()

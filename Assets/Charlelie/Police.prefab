@@ -98,3 +98,4 @@ MonoBehaviour:
   carDown: {fileID: 21300000, guid: 7d493ff3245e7974cad333abb19616b7, type: 3}
   carUp: {fileID: 21300000, guid: 7f86fd4e9b1541e4689ad68cf8062070, type: 3}
   carSide: {fileID: 21300000, guid: d1dee093e9479e0489207f18cb220f36, type: 3}
+  speed: 2

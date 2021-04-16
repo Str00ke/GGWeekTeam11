@@ -24,44 +24,54 @@ public class PolicePatrol : MonoBehaviour
     SpriteRenderer sR;
     public Sprite carDown, carUp, carSide;
 
-    int policePos;
+    bool isCoroutineRunning = false;
+
+    PlayerController playerController;
+
+    int policePos, tmpPos;
     int policePosParent;
     Vector3 policeDirStart;
     Vector3 policeDirEnd;
+    Vector3 target;
+    public float speed;
     
     void Start()
     {
+        playerController = FindObjectOfType<PlayerController>();
         sR = GetComponent<SpriteRenderer>();
         nodeManager = FindObjectOfType<NodesManager>();
         radio = FindObjectOfType<Radio>();
-        int randNode = Random.Range(0, nodeManager.nodes.Length);
+        int randNode = RandStartPos();
         policePos = randNode;
         policePosParent = policePos;       
         policeDirStart = nodeManager.nodes[policePos].transform.position;
         transform.position = policeDirStart;
     }
 
+    int RandStartPos()
+    {
+        int randNode = Random.Range(0, nodeManager.nodes.Length);
+        if (randNode == 82)
+            return RandStartPos();
+        else return randNode;
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if (carDir == CarDir.LEFT || carDir == CarDir.RIGHT)
+        if (playerController.isAtNode)
         {
-            sR.sprite = carSide;
-            if (carDir == CarDir.LEFT)
-                sR.flipX = false;
-            else
-                sR.flipX = true;
+            target = nodeManager.nodes[playerController.playerPos].transform.position;
         } else
         {
-            sR.flipX = false;
-            if (carDir == CarDir.UP)
+            /*if (isCoroutineRunning)
             {
-                sR.sprite = carUp;
-            } else
-            {
-                sR.sprite = carDown;
-            } 
+                StopCoroutine(MovePolicePatrol(policeDirStart, policeDirEnd));
+            }*/
+            target = playerController.transform.position;
         }
+
+        
 
         if (radio.isOnFrequency)
             sR.color = new Color(sR.color.r, sR.color.g, sR.color.b, 255);
@@ -97,10 +107,17 @@ public class PolicePatrol : MonoBehaviour
                 StartCoroutine(MovePolicePatrol());
                 if (CheckForEngageChase())
                 {
+                    policeDirStart = transform.position;
+                    policeDirEnd = nodeManager.nodes[policePos].transform.position;
                     behaviour = Behaviour.CHASE;
+                    speed = 1.5f;
+                    if (isCoroutineRunning)
+                    {
+                        StopCoroutine(MovePolicePatrol());
+                        //Debug.Log("Stopped Coroutine");
+                    }
                     //Debug.Log("Entering Chase Mode");
                     //Debug.Break();
-                    PoliceInstigatePosition();
                 }
                     
             }
@@ -118,6 +135,7 @@ public class PolicePatrol : MonoBehaviour
                 {
                     isAtNode = true;
                     behaviour = Behaviour.PATROL;
+                    speed = 2;
                 }
                     
                 policePosParent = policePos;
@@ -128,27 +146,55 @@ public class PolicePatrol : MonoBehaviour
 
     }
 
+    void UpdateCarSprite()
+    {
+        if (carDir == CarDir.LEFT || carDir == CarDir.RIGHT)
+        {
+            sR.sprite = carSide;
+            if (carDir == CarDir.LEFT)
+                sR.flipX = false;
+            else
+                sR.flipX = true;
+        }
+        else
+        {
+            sR.flipX = false;
+            if (carDir == CarDir.UP)
+            {
+                sR.sprite = carUp;
+            }
+            else
+            {
+                sR.sprite = carDown;
+            }
+        }
+    }
+
     Vector3 ChooseNode(List<int> poses)
     {
+        //Debug.Log("ChooseNode...");
         Vector3 nodeChoosen;
         policeDirStart = nodeManager.nodes[policePos].transform.position;
         int rand = Random.Range(0, poses.Count);
         policePosParent = policePos;
-        policePos = poses[rand];
+        tmpPos = poses[rand];
         nodeChoosen = nodeManager.nodes[poses[rand]].transform.position;
 
-        if (policePos == policePosParent + nodeManager.width) carDir = CarDir.DOWN;
-        else if (policePos == policePosParent - nodeManager.width) carDir = CarDir.UP;
-        else if (policePos == policePosParent - 1) carDir = CarDir.LEFT;
-        else if (policePos == policePosParent + 1) carDir = CarDir.RIGHT;
+        if (tmpPos == policePos + nodeManager.width) carDir = CarDir.DOWN;
+        else if (tmpPos == policePos - nodeManager.width) carDir = CarDir.UP;
+        else if (tmpPos == policePos - 1) carDir = CarDir.LEFT;
+        else if (tmpPos == policePos + 1) carDir = CarDir.RIGHT;
+
+        UpdateCarSprite();
 
         return nodeChoosen;
     }
 
     IEnumerator MovePolicePatrol()
     {
+        isCoroutineRunning = true;
         float time = 0;
-        float duration = 0.2f;
+        float duration = speed;
 
         while (time < duration)
         {
@@ -157,107 +203,211 @@ public class PolicePatrol : MonoBehaviour
             yield return null;
         }
         isAtNode = true;
+        isCoroutineRunning = false;
+        if (behaviour == Behaviour.CHASE)
+            policePosParent = policePos;
+        else
+        {
+            policePos = tmpPos;
+        }
     }
 
    bool CheckForEngageChase()
    {
-        PlayerController playerController = FindObjectOfType<PlayerController>();
-
         if (playerController.isInHole) return false;
-
 
         bool isSeeingPlayer = false;
         int playerPos = playerController.playerPos;
+        int playerPosParent = playerController.playerPosParent;
+        int futurePlayerPos = playerController.futurePlayerPos;
         GameObject player = playerController.gameObject;
         float dist = Vector3.Distance(transform.position, player.transform.position);
-        //Debug.Log(/*carDir + "   " + */policePos + "   " + playerPos);
+        
         if (behaviour == Behaviour.PATROL)
         {
-            if (/*dist <= 1*/true)
+            if (/*dist <= 1*/playerController.isAtNode)
             {
-                if (carDir == CarDir.UP && playerPos == policePosParent - nodeManager.width)
-                {
-                    isSeeingPlayer = true;
-                    policePos -= nodeManager.width;
-                }
-                    
-                else if (carDir == CarDir.DOWN && playerPos == policePosParent + nodeManager.width)
-                {
-                    isSeeingPlayer = true;
-                    policePos += nodeManager.width;
-                }
-                else if (carDir == CarDir.LEFT && playerPos == policePosParent - 1)
-                {
-                    isSeeingPlayer = true;
-                    policePos -= 1;
-                }
-                else if (carDir == CarDir.RIGHT && playerPos == policePosParent + 1)
-                {
-                    isSeeingPlayer = true;
-                    policePos += 1;
-                }
-                else if (policePosParent == playerPos || policePos == playerPos)
+                if (carDir == CarDir.UP && (playerPos == policePos - nodeManager.width))
                 {
                     isSeeingPlayer = true;
                     policePos = playerPos;
                 }
-            }
-        } else if (behaviour == Behaviour.CHASE)
-        {
-            if (dist < 0.5f)
-            {
-                //nodeManager.Busted();
-            }
-            if (/*dist <= 2*/ true)
-            {
-                if (playerPos == policePos - nodeManager.width)
+                    
+                else if (carDir == CarDir.DOWN && (playerPos == policePos + nodeManager.width))
                 {
                     isSeeingPlayer = true;
-                    policePos -= nodeManager.width;
+                    policePos = playerPos;
                 }
-
-                else if (playerPos == policePos + nodeManager.width)
+                else if (carDir == CarDir.LEFT && (playerPos == policePos - 1))
                 {
                     isSeeingPlayer = true;
-                    policePos += nodeManager.width;
+                    policePos = playerPos;
                 }
-                else if (playerPos == policePos - 1)
+                else if (carDir == CarDir.RIGHT && (playerPos == policePos + 1))
                 {
                     isSeeingPlayer = true;
-                    policePos -= 1;
-                }
-                else if (playerPos == policePos + 1)
-                {
-                    isSeeingPlayer = true;
-                    policePos += 1;
+                    policePos = playerPos;
                 }
                 else if (policePos == playerPos)
                 {
                     isSeeingPlayer = true;
                     policePos = playerPos;
                 }
+            } /*else
+            {
+                if (carDir == CarDir.UP && (futurePlayerPos == policePosParent - nodeManager.width || futurePlayerPos == policePos))
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }
+
+                else if (carDir == CarDir.DOWN && (futurePlayerPos == policePosParent + nodeManager.width || futurePlayerPos == policePos))
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }
+                else if (carDir == CarDir.LEFT && (futurePlayerPos == policePosParent - 1 || futurePlayerPos == policePos))
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }
+                else if (carDir == CarDir.RIGHT && (futurePlayerPos == policePosParent + 1 || futurePlayerPos == policePos))
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }
+            }*/
+            
+            return isSeeingPlayer;
+        } else if (behaviour == Behaviour.CHASE)
+        {
+            if (dist < 0.5f)
+            {
+                //nodeManager.Busted();
             }
+            if (/*dist <= 2*/ playerController.isAtNode)
+            {
+                /*if (playerPos == policePos - nodeManager.width)
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }
+
+                else if (playerPos == policePos + nodeManager.width)
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }
+                else if (playerPos == policePos - 1)
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }
+                else if (playerPos == policePos + 1)
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }
+                else if (policePos == playerPos)
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }
+            } else
+            {
+                if (futurePlayerPos == policePos - nodeManager.width)
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }
+
+                else if (futurePlayerPos == policePos + nodeManager.width)
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }
+                else if (futurePlayerPos == policePos - 1)
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }
+                else if (futurePlayerPos == policePos + 1)
+                {
+                    isSeeingPlayer = true;
+                    policePos = playerPos;
+                }*/
+                if (policePos == playerPos)
+                {
+                    return true;
+                }
+
+
+                if (carDir == CarDir.UP && playerPos == policePos - nodeManager.width) isSeeingPlayer = true;
+                else if (carDir == CarDir.DOWN && playerPos == policePos + nodeManager.width) isSeeingPlayer = true;
+                else if (carDir == CarDir.LEFT && playerPos == policePos - 1) isSeeingPlayer = true;
+                else if (carDir == CarDir.RIGHT && playerPos == policePos + 1) isSeeingPlayer = true;
+
+                if (isSeeingPlayer) policePos = playerPos;
+                
+            } /*else
+            {
+                if (carDir == CarDir.UP && futurePlayerPos == policePos - nodeManager.width) isSeeingPlayer = true;
+                else if (carDir == CarDir.DOWN && futurePlayerPos == policePos + nodeManager.width) isSeeingPlayer = true;
+                else if (carDir == CarDir.LEFT && futurePlayerPos == policePos - 1) isSeeingPlayer = true;
+                else if (carDir == CarDir.RIGHT && futurePlayerPos == policePos + 1) isSeeingPlayer = true;
+
+                if (isSeeingPlayer) policePos = futurePlayerPos;
+            }*/
             /*else
                 isSeeingPlayer = false;*/
             //Debug.Log(isSeeingPlayer);
         }
 
-        
+
         return isSeeingPlayer;
-   }
+    }
 
     void PoliceInstigatePosition()
     {
+        //Debug.Log("Instigate...");
         int playerPos = FindObjectOfType<PlayerController>().playerPos;
         policeDirStart = nodeManager.nodes[policePosParent].transform.position;
-        policeDirEnd = nodeManager.nodes[playerPos].transform.position;
+        policeDirEnd = nodeManager.nodes[policePos].transform.position;
+        /*if (!isCoroutineRunning)
+        {
+            if (playerController.isAtNode)
+                StartCoroutine(MovePolicePatrol(policeDirStart, policeDirEnd));
+            else
+                StartCoroutine(MovePolicePatrol(policeDirStart, target));
+        }*/
         StartCoroutine(MovePolicePatrol());
-        
+
+
     }
 
     void PoliceChase()
     {
         Vector3 playerPos = FindObjectOfType<PlayerController>().transform.position;
         Vector3.MoveTowards(transform.position, playerPos, 5 * Time.deltaTime);
+
+        if (playerPos.x > transform.position.x)
+        {
+            Vector3.MoveTowards(transform.position, Vector2.right, 5 * Time.deltaTime);
+            return;
+        } else if (playerPos.x < transform.position.x)
+        {
+            Vector3.MoveTowards(transform.position, playerPos, 5 * Time.deltaTime);
+            return;
+        }
+
+        if (playerPos.y > transform.position.y)
+        {
+            Vector3.MoveTowards(transform.position, playerPos, 5 * Time.deltaTime);
+            return;
+        } else if (playerPos.y < transform.position.y)
+        {
+            Vector3.MoveTowards(transform.position, playerPos, 5 * Time.deltaTime);
+            return;
+        }
     }
 }

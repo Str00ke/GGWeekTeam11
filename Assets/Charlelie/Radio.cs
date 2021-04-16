@@ -18,6 +18,9 @@ public class Radio : MonoBehaviour
     public TextMesh freqText;
     public GameObject button;
 
+    public AudioClip chat1, chat2;
+    AudioSource audioSource;
+
     SerialPort stream = new SerialPort("COM3", 9600);
 
     void Start()
@@ -25,7 +28,8 @@ public class Radio : MonoBehaviour
         //stream.ReadTimeout = 50;
         stream.Open();
 
-
+        audioSource = Camera.main.GetComponent<AudioSource>();
+        audioSource.clip = chat1;
         minVec = minPos.transform.position;
         maxVec = maxPos.transform.position;
         speed = 10 * Time.deltaTime;
@@ -41,11 +45,12 @@ public class Radio : MonoBehaviour
         if (valueInt <= 800)
         {
             index = (valueInt / 800) * 100;
+            index = (float)System.Math.Round(index, 1);
             freqText.text = index.ToString();
             button.transform.rotation = Quaternion.Euler(0, 0, valueInt);
         }
 
-        Debug.Log(frequency);
+        //Debug.Log(frequency);
         pos.transform.position = MovePos();
 
         if (index >= minBound && index <= maxBound)
@@ -58,6 +63,25 @@ public class Radio : MonoBehaviour
         {
             RandomizeFrequency();
             changeFreqTime = changeFrequencyTime;
+        }
+
+        if (isOnFrequency)
+        {
+            if (!audioSource.isPlaying)
+            {
+                audioSource.Play();
+            } else
+            {
+                audioSource.clip = chat2;
+                audioSource.Play();
+            }
+            
+        } else
+        {
+            if (audioSource.isPlaying)
+            {
+                audioSource.Stop();
+            }
         }
             
     }

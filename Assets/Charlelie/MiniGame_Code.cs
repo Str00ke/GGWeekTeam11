@@ -15,6 +15,7 @@ public class MiniGame_Code : MonoBehaviour
     string code;
     int codeToGuess;
     int codeIndex;
+    float delay = 2;
     // Start is called before the first frame update
     void Start()
     {
@@ -33,7 +34,7 @@ public class MiniGame_Code : MonoBehaviour
             codeGuessList[i].text = i.ToString();
         }
 
-        
+        HideShow();
 
         if (nodeManager.playType == PlayType.WATCHER)
         {
@@ -43,7 +44,15 @@ public class MiniGame_Code : MonoBehaviour
 
     void Update()
     {
+        if (delay > 0)
+            delay -= Time.deltaTime;
+        else
+            CodeShowPanel.SetActive(false);
+    }
 
+    void HideShow()
+    {
+        
     }
 
     int RandomizeNbr(int index)

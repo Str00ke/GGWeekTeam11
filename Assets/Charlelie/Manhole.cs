@@ -22,26 +22,30 @@ public class Manhole : MonoBehaviour
         return couple.transform.position;
     }
 
-    public GameObject CheckNearNode(Vector3 playerPos)
+    public int CheckNearNode(Vector3 playerPos)
     {
         Collider2D[] col = Physics2D.OverlapCircleAll(playerPos, 5);
         return GetNearestNode(col, playerPos);
     }
 
-    GameObject GetNearestNode(Collider2D[] col, Vector3 pos)
+    int GetNearestNode(Collider2D[] col, Vector3 pos)
     {
         GameObject nearest = null;
         float minDist = 9999;
 
         foreach(Collider2D go in col)
         {
-            float tmpDist = Vector3.Distance(go.gameObject.transform.position, pos);
-            if (tmpDist < minDist)
+            if (go.gameObject != gameObject)
             {
-                minDist = tmpDist;
-                nearest = go.gameObject;
+                float tmpDist = Vector3.Distance(go.gameObject.transform.position, pos);
+                if (tmpDist < minDist)
+                {
+                    minDist = tmpDist;
+                    nearest = go.gameObject;
+                }
             }
+            
         }
-        return nearest;
+        return nearest.GetComponent<Node>().index;
     }
 }
